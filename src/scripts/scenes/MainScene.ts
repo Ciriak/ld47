@@ -64,7 +64,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   rewind() {
-    this.cameras.main.shake(500, 0.005);
+    this.cameras.main.shake(500, 0.003);
 
     this.soundManager.bgMusic.pause();
     this.soundManager.rewind.play();
@@ -115,16 +115,22 @@ export default class MainScene extends Phaser.Scene {
 
     this.anims.create({
       key: 'playerIdle',
-      frames: this.anims.generateFrameNumbers('character', { start: 0, end: 0 }),
+      frames: this.anims.generateFrameNumbers('character', { start: 16, end: 17 }),
       repeat: -1,
-      frameRate: 10,
+      frameRate: 2,
     });
 
     this.anims.create({
       key: 'playerSpawn',
       frames: this.anims.generateFrameNumbers('character', { start: 11, end: 15 }),
-
       frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'playerGlitch',
+      frames: this.anims.generateFrameNumbers('character', { start: 22, end: 26 }),
+      frameRate: 10,
+      repeat: -1,
     });
 
     this.anims.create({

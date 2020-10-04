@@ -64,9 +64,9 @@ export default class FallingPlatform extends GameplayEntitie {
   private crash() {
     clearTimeout(animTimeout);
     this.isCrashing = true;
-
     this.sprite.anims.stop();
     this.sprite.anims.play('fallingPlatformCrash');
+    this.scene.soundManager.brokenPlatform.play();
     setTimeout(() => {
       this.sprite.setStatic(false);
       // this.sprite.setSensor(true);

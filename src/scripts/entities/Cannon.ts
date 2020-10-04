@@ -88,6 +88,8 @@ export default class Cannon extends GameplayEntitie {
     projectile.setFrictionAir(0);
     projectile.setSensor(true);
 
+    this.scene.soundManager.cannon.play();
+
     switch (this.direction) {
       case 'right':
         projectile.setVelocity(projectileVelocity, 0);

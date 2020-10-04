@@ -74,7 +74,7 @@ export default class Character {
     this.checkOutOfBounds();
 
     this.isInAir = false;
-    if (this.entitie.body.velocity.y < -0.1) {
+    if (this.entitie.body.velocity.y < -0.1 || this.entitie.body.velocity.y > 0.1) {
       this.isInAir = true;
     }
   }
@@ -86,7 +86,7 @@ export default class Character {
   }
 
   private animationsManager() {
-    if (this.isSpawning) {
+    if (this.isSpawning || !this.isActive) {
       return;
     }
     if (this.entitie.body.velocity.y < -0.1) {
@@ -211,6 +211,7 @@ export default class Character {
 
     // disable all collisions
     this.entitie.setToSleep();
+    this.entitie.anims.play('playerGlitch');
   }
 
   enable() {
