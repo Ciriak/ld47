@@ -3,18 +3,22 @@ import "./styles/style.scss";
 import "phaser";
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
-  backgroundColor: "#000000",
-  height: window.innerHeight,
+  backgroundColor: "#212121",
+  width: 1280,
+  height: 800,
   parent: "game",
+
+  render: {
+    pixelArt: true,
+  },
   physics: {
-    arcade: {
-      debug: false, // true for collisions debug
+    default: "matter",
+    matter: {
+      debug: true,
     },
-    default: "arcade",
   },
   scene: [MainScene],
   type: Phaser.AUTO,
-  width: document.body.offsetWidth,
 };
 // tslint:disable-next-line: no-unused-expression
 new Phaser.Game(gameConfig);

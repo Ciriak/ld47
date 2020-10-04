@@ -34,9 +34,8 @@
   "homepage": "https://github.com/nj-neer/phaser3-typescript-starter/#readme",
   "devDependencies": {},
   "dependencies": {
-    "copy-webpack-plugin": "^6.1.1",
+    "copy-webpack-plugin": "^6.2.0",
     "css-loader": "^2.1.1",
-    "husky": "^4.3.0",
     "node-sass": "^4.14.1",
     "phaser": "^3.24.1",
     "prettier": "^2.1.2",
