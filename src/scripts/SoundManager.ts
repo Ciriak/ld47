@@ -7,6 +7,7 @@ export default class SoundManager {
   public respawn: Phaser.Sound.BaseSound;
   public jump: Phaser.Sound.BaseSound;
   public death: Phaser.Sound.BaseSound;
+  public bumperJump: Phaser.Sound.BaseSound;
   constructor(scene: MainScene) {
     this.scene = scene;
   }
@@ -17,6 +18,7 @@ export default class SoundManager {
     this.scene.load.audio('rewind', './assets/sounds/rewind.wav');
     this.scene.load.audio('respawn', './assets/sounds/respawn.wav');
     this.scene.load.audio('death', './assets/sounds/death.wav');
+    this.scene.load.audio('bumperJump', './assets/sounds/bumperJump.wav');
   }
 
   create() {
@@ -28,6 +30,7 @@ export default class SoundManager {
     this.respawn = this.scene.sound.add('respawn');
     this.death = this.scene.sound.add('death');
     this.jump = this.scene.sound.add('jump');
+    this.bumperJump = this.scene.sound.add('bumperJump');
   }
 
   playRewind() {

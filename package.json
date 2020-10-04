@@ -36,6 +36,7 @@
   "dependencies": {
     "copy-webpack-plugin": "^6.2.0",
     "css-loader": "^2.1.1",
+    "moment": "^2.29.0",
     "node-sass": "^4.14.1",
     "phaser": "^3.24.1",
     "prettier": "^2.1.2",

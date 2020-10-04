@@ -1,17 +1,19 @@
 import 'phaser';
 import MainScene from './scenes/MainScene';
-
+import { velocityToTarget } from './utils';
 export default class Character {
   public canMove: boolean;
   private scene: MainScene;
-  private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-  private jumpKey: Phaser.Input.Keyboard.Key;
+  public cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  public jumpKey: Phaser.Input.Keyboard.Key;
   public facing: 'left' | 'right';
   public canJump: boolean;
   public isInAir: boolean;
+  public isSpawning: boolean;
   public isDead: boolean;
+  public isActive: boolean;
   public entitie: Phaser.Physics.Matter.Sprite;
-  private debugText: Phaser.GameObjects.Text;
+
   public acceleration: number;
   public maxVelocity: {
     x: number;
@@ -22,6 +24,8 @@ export default class Character {
     this.canJump = false;
     this.isInAir = false;
     this.isDead = false;
+    this.isSpawning = false;
+    this.isActive = false;
     this.maxVelocity = {
       x: 3,
       y: 3,
@@ -48,7 +52,6 @@ export default class Character {
 
     this.entitie.setData('isPlayer', true);
     this.inputsListener();
-    this.debugText = this.scene.add.text(10, 10, 'Debug', { font: '16px Courier', fill: '#00ff00' }).setScrollFactor(0);
 
     let count = 0;
 
@@ -62,38 +65,30 @@ export default class Character {
       }
     });
 
-    this.generateAnimations();
     this.generateCamera();
   }
 
   public update() {
     this.inputsListener();
     this.animationsManager();
+    this.checkOutOfBounds();
 
     this.isInAir = false;
     if (this.entitie.body.velocity.y < -0.1) {
       this.isInAir = true;
     }
+  }
 
-    const pointer = this.entitie.body;
-
-    this.debugText.setText([
-      'position x: ' + this.entitie.x,
-      'position y: ' + this.entitie.y,
-      'velocity x: ' + pointer.velocity.x,
-      'velocity y: ' + pointer.velocity.y,
-      'left: ' + this.cursors.left.isDown,
-      'right: ' + this.cursors.right.isDown,
-      'direction: ' + this.facing,
-      'jumpKey :' + this.jumpKey.isDown,
-      'canJump: ' + this.canJump,
-      'canMove: ' + this.canMove,
-      'isInAir: ' + this.isInAir,
-      'animation: ' + this.entitie.anims.currentAnim.key,
-    ]);
+  private checkOutOfBounds() {
+    if (this.entitie.x > 5000 || this.entitie.y > 2000) {
+      this.kill();
+    }
   }
 
   private animationsManager() {
+    if (this.isSpawning) {
+      return;
+    }
     if (this.entitie.body.velocity.y < -0.1) {
       this.entitie.anims.play('playerJump', true);
     } else {
@@ -107,58 +102,52 @@ export default class Character {
 
   private generateCamera() {
     this.scene.cameras.main.startFollow(this.entitie, true, 0.05, 0.05);
-  }
-
-  private generateAnimations() {
-    this.scene.anims.create({
-      key: 'playerWalk',
-      frames: this.scene.anims.generateFrameNumbers('character', { start: 0, end: 3 }),
-      repeat: -1,
-      frameRate: 10,
-    });
-
-    this.scene.anims.create({
-      key: 'playerJump',
-      frames: this.scene.anims.generateFrameNumbers('character', { start: 4, end: 4 }),
-
-      frameRate: 10,
-    });
-
-    this.scene.anims.create({
-      key: 'playerIdle',
-      frames: this.scene.anims.generateFrameNumbers('character', { start: 0, end: 0 }),
-      repeat: -1,
-      frameRate: 10,
-    });
+    this.scene.cameras.main.setBounds(0, 0, 80 * 32, 30 * 32);
   }
 
   public kill() {
+    if (this.isDead) {
+      return;
+    }
     this.isDead = true;
     this.canMove = false;
+
     this.scene.rewind();
     this.scene.soundManager.death.play();
   }
 
   public spawn() {
     const coord = this.scene.level.getSpawnPoint();
+    this.isSpawning = true;
     this.entitie.setPosition(coord.x, coord.y);
     this.entitie.setIgnoreGravity(false);
-    this.canMove = true;
-    this.isDead = false;
+    this.entitie.anims.play('playerSpawn');
     this.scene.soundManager.respawn.play();
+
+    setTimeout(() => {
+      this.canMove = true;
+      this.isDead = false;
+      this.isSpawning = false;
+    }, 500);
   }
 
   private inputsListener() {
     if (this.isDead) {
       this.entitie.setVelocity(0, 0);
       this.entitie.setIgnoreGravity(true);
+      return;
     }
     // ignore if player can't move
     if (!this.canMove) {
       return;
     }
 
+    if (this.isSpawning) {
+      return;
+    }
+
     let acceleration = this.acceleration;
+    this.entitie.setIgnoreGravity(false);
 
     if (this.cursors.left.isDown) {
       if (this.facing !== 'left' || this.isInAir) {
@@ -213,5 +202,21 @@ export default class Character {
       this.entitie.setVelocityY(-7);
       this.canJump = false;
     }
+  }
+
+  disable() {
+    this.isActive = false;
+    this.canJump = false;
+    this.canMove = false;
+
+    // disable all collisions
+    this.entitie.setToSleep();
+  }
+
+  enable() {
+    this.isActive = true;
+    this.canJump = true;
+    this.canMove = true;
+    this.entitie.setAwake();
   }
 }

@@ -4,6 +4,10 @@ import GameplayEntitie, { gameplayItemName, gameplayItemsIndex } from './entitie
 import Spike from './entities/Spike';
 import SpawnPoint from './entities/SpawnPoint';
 import EndPoint from './entities/EndPoint';
+import Bumper from './entities/Bumper';
+import Bloc from './entities/Bloc';
+import FallingPlatform from './entities/FallingPlatform';
+import Cannon from './entities/Cannon';
 
 export default class Level {
   public currentLevel: number;
@@ -11,7 +15,6 @@ export default class Level {
   private map: Phaser.Tilemaps.Tilemap;
   private backgroundLayer: Phaser.Tilemaps.StaticTilemapLayer;
   private backgroundLayerDecorations: Phaser.Tilemaps.StaticTilemapLayer;
-  private gameplayLayer: Phaser.Tilemaps.DynamicTilemapLayer;
   private levelMapLayer: Phaser.Tilemaps.DynamicTilemapLayer;
   private layoutLayer: Phaser.Tilemaps.DynamicTilemapLayer;
   public gameplayItems: GameplayEntitie[] = [];
@@ -32,6 +35,7 @@ export default class Level {
 
   public setLevel(level: number) {
     this.currentLevel = level;
+
     this.generateLevel(this.currentLevel);
   }
 
@@ -39,21 +43,18 @@ export default class Level {
     // tslint:disable-next-line: no-console
     console.log('Generating level ' + level);
 
-    this.levelMapLayer = this.map.createDynamicLayer(`level${level}-map`, 'tileset');
-    this.gameplayLayer = this.map.createDynamicLayer(`level${level}-gameplay`, 'tileset');
+    this.cleanLevel();
+    this.levelMapLayer = this.map.getLayer(`level${level}`)?.tilemapLayer as Phaser.Tilemaps.DynamicTilemapLayer;
+    if (!this.levelMapLayer) {
+      this.levelMapLayer = this.map.createDynamicLayer(`level${level}`, 'tileset');
+    }
+
+    this.levelMapLayer.setVisible(false);
 
     const gameplayTiles: Phaser.Tilemaps.Tile[] = [];
 
-    this.gameplayItems = [];
-
-    // generate the collisions from the map layer
-    this.levelMapLayer.setCollisionByExclusion([-1]);
-    this.scene.matter.world.convertTilemapLayer(this.levelMapLayer, {
-      isStatic: true,
-    });
-
     // detect all gameplay elements
-    this.gameplayLayer.forEachTile((tile) => {
+    this.levelMapLayer.forEachTile((tile) => {
       if (tile.index > -1) {
         gameplayTiles.push(tile);
       }
@@ -69,10 +70,22 @@ export default class Level {
     }
   }
 
+  /**
+   * Remove all the entities from the level
+   */
+  private cleanLevel() {
+    for (const entitie of this.gameplayItems) {
+      entitie.onDestroy();
+      entitie.sprite.destroy(true);
+    }
+
+    this.gameplayItems = [];
+  }
+
   private generateGameplayItem(item: Phaser.Tilemaps.Tile, type: gameplayItemName) {
-    if (typeof gameplayItemsIndex[type] === 'undefined') {
-      // tslint:disable-next-line: no-console
-      console.warn('Unknown gameplay item : ' + type);
+    if (!type || typeof gameplayItemsIndex[type] === 'undefined') {
+      // if it's not a gameplay item
+      this.gameplayItems.push(new Bloc(this.scene, item));
       return;
     }
 
@@ -85,6 +98,15 @@ export default class Level {
         break;
       case 'spike':
         this.gameplayItems.push(new Spike(this.scene, item));
+        break;
+      case 'bumper':
+        this.gameplayItems.push(new Bumper(this.scene, item));
+        break;
+      case 'fallingPlatform':
+        this.gameplayItems.push(new FallingPlatform(this.scene, item));
+        break;
+      case 'cannon':
+        this.gameplayItems.push(new Cannon(this.scene, item));
         break;
 
       default:

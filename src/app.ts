@@ -1,20 +1,20 @@
-import MainScene from "./scripts/scenes/MainScene";
-import "./styles/style.scss";
-import "phaser";
+import MainScene from './scripts/scenes/MainScene';
+import './styles/style.scss';
+import 'phaser';
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
-  backgroundColor: "#212121",
+  backgroundColor: '#212121',
   width: 1280,
   height: 800,
-  parent: "game",
+  parent: 'game',
 
   render: {
     pixelArt: true,
   },
   physics: {
-    default: "matter",
+    default: 'matter',
     matter: {
-      debug: true,
+      debug: false,
     },
   },
   scene: [MainScene],
