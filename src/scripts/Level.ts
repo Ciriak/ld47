@@ -19,7 +19,7 @@ export default class Level {
   private layoutLayer: Phaser.Tilemaps.DynamicTilemapLayer;
   public gameplayItems: GameplayEntitie[] = [];
   constructor(scene: MainScene) {
-    this.currentLevel = 1;
+    this.currentLevel = 0;
     this.scene = scene;
     // const tileset = this.map.addTilesetImage('tileset', null, 32, 32, 1, 2);
     this.map = this.scene.make.tilemap({ key: 'map', tileWidth: 32, tileHeight: 32 });

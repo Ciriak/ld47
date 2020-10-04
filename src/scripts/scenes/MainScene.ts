@@ -24,6 +24,8 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 32,
     });
 
+    this.load.image('bg_city', 'assets/graphics/bg_city.png');
+
     this.load.spritesheet('tileset', 'assets/graphics/tileset.png', {
       frameWidth: 32,
       frameHeight: 32,
