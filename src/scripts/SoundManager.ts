@@ -10,6 +10,7 @@ export default class SoundManager {
   public bumperJump: Phaser.Sound.BaseSound;
   public brokenPlatform: Phaser.Sound.BaseSound;
   public cannon: Phaser.Sound.BaseSound;
+  public end: Phaser.Sound.BaseSound;
   constructor(scene: MainScene) {
     this.scene = scene;
   }
@@ -23,6 +24,7 @@ export default class SoundManager {
     this.scene.load.audio('bumperJump', './assets/sounds/bumperJump.wav');
     this.scene.load.audio('brokenPlatform', './assets/sounds/brokenPlatform.wav');
     this.scene.load.audio('cannon', './assets/sounds/cannon.wav');
+    this.scene.load.audio('end', './assets/sounds/end.wav');
   }
 
   create() {
@@ -37,6 +39,7 @@ export default class SoundManager {
     this.bumperJump = this.scene.sound.add('bumperJump');
     this.brokenPlatform = this.scene.sound.add('brokenPlatform');
     this.cannon = this.scene.sound.add('cannon');
+    this.end = this.scene.sound.add('end');
   }
 
   playRewind() {

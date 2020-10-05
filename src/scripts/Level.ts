@@ -8,9 +8,11 @@ import Bumper from './entities/Bumper';
 import Bloc from './entities/Bloc';
 import FallingPlatform from './entities/FallingPlatform';
 import Cannon from './entities/Cannon';
+import moment from 'moment';
 
 export default class Level {
   public currentLevel: number;
+  public maxLevel: number;
   private scene: MainScene;
   private map: Phaser.Tilemaps.Tilemap;
   private backgroundLayer: Phaser.Tilemaps.StaticTilemapLayer;
@@ -19,7 +21,8 @@ export default class Level {
   private layoutLayer: Phaser.Tilemaps.DynamicTilemapLayer;
   public gameplayItems: GameplayEntitie[] = [];
   constructor(scene: MainScene) {
-    this.currentLevel = 0;
+    this.currentLevel = 1;
+    this.maxLevel = 11;
     this.scene = scene;
     // const tileset = this.map.addTilesetImage('tileset', null, 32, 32, 1, 2);
     this.map = this.scene.make.tilemap({ key: 'map', tileWidth: 32, tileHeight: 32 });
@@ -28,14 +31,34 @@ export default class Level {
     this.backgroundLayerDecorations = this.map.createStaticLayer('background-decoration', 'tileset');
     this.layoutLayer = this.map.createDynamicLayer('layout', 'tileset');
     this.layoutLayer.setCollisionByExclusion([-1]);
-    this.scene.matter.world.convertTilemapLayer(this.layoutLayer);
 
-    this.generateLevel(this.currentLevel);
+    this.scene.matter.world.convertTilemapLayer(this.layoutLayer);
+    this.setLevel(this.currentLevel);
   }
 
   public setLevel(level: number) {
-    this.currentLevel = level;
+    if (level === 1) {
+      this.scene.speedRunStart = new Date();
+      this.scene.speedRunActive = true;
 
+      this.scene.soundManager.bgMusic.play({ loop: true });
+
+      this.scene.deathCount = 0;
+
+      if (this.scene.deathCountText) {
+        this.scene.deathCountText.setPosition(-100, -100);
+      }
+
+      if (this.scene.speedRunText) {
+        this.scene.speedRunText.setPosition(-100, -100);
+      }
+    }
+
+    if (level === 99) {
+      this.handleEndScreen();
+    }
+
+    this.currentLevel = level;
     this.generateLevel(this.currentLevel);
   }
 
@@ -44,6 +67,7 @@ export default class Level {
     console.log('Generating level ' + level);
 
     this.cleanLevel();
+
     this.levelMapLayer = this.map.getLayer(`level${level}`)?.tilemapLayer as Phaser.Tilemaps.DynamicTilemapLayer;
     if (!this.levelMapLayer) {
       this.levelMapLayer = this.map.createDynamicLayer(`level${level}`, 'tileset');
@@ -68,6 +92,18 @@ export default class Level {
     for (const gameplayItem of this.gameplayItems) {
       gameplayItem.add();
     }
+  }
+
+  private handleEndScreen() {
+    this.scene.soundManager.bgMusic.stop();
+    this.scene.speedRunActive = false;
+
+    this.scene.soundManager.end.play();
+    if (this.scene.speedRunText) {
+      this.scene.speedRunText.setPosition(300, 560);
+    }
+
+    this.scene.deathCountText.setPosition(300, 590).setText(String(this.scene.deathCount));
   }
 
   /**

@@ -31,6 +31,7 @@ export default abstract class GameplayEntitie {
 
   public add() {
     const isTrigger: boolean = this.tileItem.properties.isTrigger || false;
+    const isProp: boolean = this.tileItem.properties.isProp || false;
     // set a trigger sprite (transparent) if it's a trigger
     let frameIndex = gameplayItemsIndex[this.name] || 0;
 
@@ -39,12 +40,12 @@ export default abstract class GameplayEntitie {
     }
 
     this.sprite = this.scene.matter.add.sprite(this.tileItem.pixelX + offset, this.tileItem.pixelY + offset, 'tileset', frameIndex, {
-      isSensor: isTrigger,
+      isSensor: isTrigger || isProp,
       isStatic: true,
     });
 
     // rebuild as a trigger if needed
-    if (isTrigger) {
+    if (isTrigger || isProp) {
       this.sprite.setBody({
         type: 'circle',
         radius: 12,

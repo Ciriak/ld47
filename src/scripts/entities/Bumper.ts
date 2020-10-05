@@ -12,9 +12,13 @@ export default class Bumper extends GameplayEntitie {
     this.sprite.setOnCollide((collisionInfo: Phaser.Types.Physics.Matter.MatterCollisionData) => {
       // if we collided with the player
       if (isPlayerCollision(collisionInfo)) {
+        // alway provide a jump to the player
+        this.scene.character.canJump = true;
         this.scene.character.entitie.setVelocityY(-force);
         this.scene.soundManager.bumperJump.play();
       }
     });
+
+    this.sprite.anims.play('bumperIdle');
   }
 }

@@ -1,6 +1,5 @@
 import 'phaser';
 import MainScene from './scenes/MainScene';
-import { velocityToTarget } from './utils';
 export default class Character {
   public canMove: boolean;
   private scene: MainScene;
@@ -8,6 +7,7 @@ export default class Character {
   public jumpKey: Phaser.Input.Keyboard.Key;
   public facing: 'left' | 'right';
   public canJump: boolean;
+  public jumpDirection: 'left' | 'right';
   public isInAir: boolean;
   public isSpawning: boolean;
   public isDead: boolean;
@@ -21,6 +21,7 @@ export default class Character {
   };
   constructor(scene: MainScene) {
     this.facing = 'right';
+    this.jumpDirection = 'right';
     this.canJump = false;
     this.isInAir = false;
     this.isDead = false;
@@ -46,7 +47,7 @@ export default class Character {
       width: 16,
       height: 32,
     });
-    this.entitie.setFriction(0.05);
+    this.entitie.setFriction(0.15);
     this.entitie.setFrictionAir(0.0005);
     this.entitie.setFixedRotation();
 
@@ -60,7 +61,7 @@ export default class Character {
       // if collide with it's bottom, reset jump
       this.canJump = false;
 
-      if (e.collision.normal.y !== 0) {
+      if (e.collision.normal.y !== 0 && !e.bodyA.isSensor && !e.bodyB.isSensor) {
         this.canJump = true;
       }
     });
@@ -102,7 +103,7 @@ export default class Character {
 
   private generateCamera() {
     this.scene.cameras.main.startFollow(this.entitie, true, 0.05, 0.05);
-    this.scene.cameras.main.setBounds(0, 0, 80 * 32, 30 * 32);
+    this.scene.cameras.main.setBounds(0, 0, 80 * 32, 25 * 32);
   }
 
   public kill() {
@@ -114,6 +115,7 @@ export default class Character {
 
     this.scene.rewind();
     this.scene.soundManager.death.play();
+    this.scene.deathCount++;
   }
 
   public spawn() {
@@ -150,23 +152,21 @@ export default class Character {
     this.entitie.setIgnoreGravity(false);
 
     if (this.cursors.left.isDown) {
-      if (this.facing !== 'left' || this.isInAir) {
-        acceleration = acceleration / 3;
-      }
-
       if (this.entitie.body.velocity.x < -0.1) {
-        this.facing = 'right';
+        this.facing = 'left';
         this.entitie.setScale(-1, 1);
       }
       // needed for some reason
       this.entitie.setFixedRotation();
       const forceVector = new Phaser.Math.Vector2(-5, 0);
 
-      if (this.entitie.body.velocity.x <= -this.maxVelocity.x) {
-        this.entitie.setVelocityX(-this.maxVelocity.x);
+      const velocityToApply = this.maxVelocity.x;
+
+      if (this.entitie.body.velocity.x <= -velocityToApply) {
+        this.entitie.setVelocityX(-velocityToApply);
       } else {
         // this.entitie.applyForce(forceVector);
-        this.entitie.setVelocityX(-this.maxVelocity.x);
+        this.entitie.setVelocityX(-velocityToApply);
       }
     } else if (this.cursors.right.isDown) {
       if (this.facing !== 'right' || this.isInAir) {
@@ -188,17 +188,18 @@ export default class Character {
         this.entitie.setVelocityX(this.maxVelocity.x);
       }
     } else {
-      if (this.facing !== 'right') {
-        // if (facing === 'left') {
-        //   player.frame = 0;
-        // } else {
-        //   player.frame = 5;
-        // }
-      }
+      // no direction key pressed
+      // reduce velocity if player released the direction keys while in air
+      // if (this.isInAir) {
+      //   this.entitie.setFrictionAir(this.jumpAirFriction);
+      // } else {
+      //   this.entitie.setFrictionAir(this.defaultAirFriction);
+      // }
     }
 
     if (this.jumpKey.isDown && this.canJump) {
       this.scene.soundManager.jump.play();
+      this.jumpDirection = this.facing;
       this.entitie.setVelocityY(-7);
       this.canJump = false;
     }

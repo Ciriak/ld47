@@ -115,6 +115,10 @@ export default class Cannon extends GameplayEntitie {
         this.scene.character.kill();
       }
 
+      // ignore if collided with sensor
+      if (collision.bodyA.isSensor) {
+        return;
+      }
       projectile.destroy();
     });
   }
